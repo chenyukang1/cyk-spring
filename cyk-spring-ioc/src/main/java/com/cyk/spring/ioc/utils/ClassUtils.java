@@ -65,6 +65,24 @@ public class ClassUtils {
     }
 
     /**
+     * Gets annotation.
+     *
+     * @param <A>         the type parameter
+     * @param annotations the annotations
+     * @param annoClass   the anno class
+     * @return the annotation
+     */
+    @SuppressWarnings("unchecked")
+    public static <A extends Annotation> A getAnnotation(Annotation[] annotations, Class<A> annoClass) {
+        for (Annotation annotation : annotations) {
+            if (annoClass.isInstance(annotation)) {
+                return (A) annotation;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Find annotation method.
      *
      * @param clazz     the clazz

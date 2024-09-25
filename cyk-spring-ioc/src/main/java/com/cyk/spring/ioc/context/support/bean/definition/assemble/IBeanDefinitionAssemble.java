@@ -1,4 +1,4 @@
-package com.cyk.spring.ioc.context.support.convert;
+package com.cyk.spring.ioc.context.support.bean.definition.assemble;
 
 import com.cyk.spring.ioc.context.model.BeanDefinition;
 

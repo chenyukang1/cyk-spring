@@ -1,4 +1,4 @@
-package com.cyk.spring.ioc.context.support.handler;
+package com.cyk.spring.ioc.context.support.bean.definition.handler;
 
 import com.cyk.spring.ioc.context.model.BeanDefinition;
 
@@ -6,13 +6,13 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The interface IBeanDefinitionHandler.
+ * The interface IBeanDefinitionHandle.
  *
  * @author chenyukang
  * @email chen.yukang @qq.com
  * @date 2024 /8/4
  */
-public interface IBeanDefinitionHandler {
+public interface IBeanDefinitionHandle {
 
     /**
      * Scan for class names set.

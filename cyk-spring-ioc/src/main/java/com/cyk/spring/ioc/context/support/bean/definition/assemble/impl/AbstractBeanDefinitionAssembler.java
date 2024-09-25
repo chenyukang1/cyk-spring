@@ -1,9 +1,9 @@
-package com.cyk.spring.ioc.context.support.convert.impl;
+package com.cyk.spring.ioc.context.support.bean.definition.assemble.impl;
 
 import com.cyk.spring.ioc.context.annotation.Bean;
 import com.cyk.spring.ioc.context.exception.BeanDefinitionException;
 import com.cyk.spring.ioc.context.model.BeanDefinition;
-import com.cyk.spring.ioc.context.support.convert.IBeanDefinitionAssemble;
+import com.cyk.spring.ioc.context.support.bean.definition.assemble.IBeanDefinitionAssemble;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -16,7 +16,7 @@ import java.util.Map;
  * @email chen.yukang@qq.com
  * @date 2024/8/4
  */
-public abstract class AbstractBeanDefinitionAssemble implements IBeanDefinitionAssemble {
+public abstract class AbstractBeanDefinitionAssembler implements IBeanDefinitionAssemble {
 
     @Override
     public final void assembleBean(Class<?> clazz, Map<String, BeanDefinition> beanDefinitions) {

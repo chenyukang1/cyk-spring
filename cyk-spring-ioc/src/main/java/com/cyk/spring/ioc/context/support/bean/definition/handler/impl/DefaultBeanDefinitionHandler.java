@@ -1,4 +1,4 @@
-package com.cyk.spring.ioc.context.support.handler.impl;
+package com.cyk.spring.ioc.context.support.bean.definition.handler.impl;
 
 import com.cyk.spring.ioc.context.annotation.Component;
 import com.cyk.spring.ioc.context.annotation.ComponentScan;
@@ -6,9 +6,9 @@ import com.cyk.spring.ioc.context.annotation.Configuration;
 import com.cyk.spring.ioc.context.annotation.Import;
 import com.cyk.spring.ioc.context.exception.BeanCreationException;
 import com.cyk.spring.ioc.context.model.BeanDefinition;
-import com.cyk.spring.ioc.context.support.convert.IBeanDefinitionAssemble;
-import com.cyk.spring.ioc.context.support.convert.impl.DefaultBeanDefinitionAssemble;
-import com.cyk.spring.ioc.context.support.handler.IBeanDefinitionHandler;
+import com.cyk.spring.ioc.context.support.bean.definition.assemble.IBeanDefinitionAssemble;
+import com.cyk.spring.ioc.context.support.bean.definition.assemble.impl.DefaultBeanDefinitionAssembler;
+import com.cyk.spring.ioc.context.support.bean.definition.handler.IBeanDefinitionHandle;
 import com.cyk.spring.ioc.io.ResourceResolver;
 import com.cyk.spring.ioc.utils.ClassUtils;
 import org.slf4j.Logger;
@@ -24,14 +24,14 @@ import java.util.*;
  * @email chen.yukang@qq.com
  * @date 2024/8/4
  */
-public class DefaultBeanDefinitionHandler implements IBeanDefinitionHandler {
+public class DefaultBeanDefinitionHandler implements IBeanDefinitionHandle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBeanDefinitionHandler.class);
 
     private final IBeanDefinitionAssemble defaultBeanDefinitionAssemble;
 
     public DefaultBeanDefinitionHandler() {
-        this.defaultBeanDefinitionAssemble = new DefaultBeanDefinitionAssemble();
+        this.defaultBeanDefinitionAssemble = new DefaultBeanDefinitionAssembler();
     }
 
     @Override

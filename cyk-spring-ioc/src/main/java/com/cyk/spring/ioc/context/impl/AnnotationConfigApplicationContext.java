@@ -2,8 +2,10 @@ package com.cyk.spring.ioc.context.impl;
 
 import com.cyk.spring.ioc.context.ConfigurableApplicationContext;
 import com.cyk.spring.ioc.context.model.BeanDefinition;
-import com.cyk.spring.ioc.context.support.handler.IBeanDefinitionHandler;
-import com.cyk.spring.ioc.context.support.handler.impl.DefaultBeanDefinitionHandler;
+import com.cyk.spring.ioc.context.support.bean.definition.handler.IBeanDefinitionHandle;
+import com.cyk.spring.ioc.context.support.bean.definition.handler.impl.DefaultBeanDefinitionHandler;
+import com.cyk.spring.ioc.context.support.bean.instance.IBeanInstanceCreate;
+import com.cyk.spring.ioc.context.support.bean.instance.impl.DefaultBeanInstanceCreator;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,16 +26,25 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AnnotationConfigApplicationContext.class);
 
-    protected final Map<String, BeanDefinition> beanDefinitions;
+    protected final IBeanDefinitionHandle beanDefinitionHandler;
+    protected final IBeanInstanceCreate beanInstanceCreator;
+    protected Map<String, BeanDefinition> beanDefinitions;
+
+    public AnnotationConfigApplicationContext(IBeanDefinitionHandle beanDefinitionHandler,
+                                              IBeanInstanceCreate beanInstanceCreator,
+                                              Class<?> configClass) {
+        this.beanDefinitionHandler = beanDefinitionHandler;
+        this.beanInstanceCreator = beanInstanceCreator;
+
+        // init
+        init(configClass);
+
+        // refresh
+        refresh(beanDefinitions);
+    }
 
     public AnnotationConfigApplicationContext(Class<?> configClass) {
-        IBeanDefinitionHandler defaultBeanDefinitionHandler = new DefaultBeanDefinitionHandler();
-
-        // 1.扫描获取所有Bean的Class类型
-        Set<String> beanClassNames = defaultBeanDefinitionHandler.scanForClassNames(configClass);
-
-        // 2.创建Bean的定义
-        beanDefinitions = defaultBeanDefinitionHandler.createBeanDefinitions(beanClassNames);
+        this(new DefaultBeanDefinitionHandler(), new DefaultBeanInstanceCreator(), configClass);
     }
 
     @Override
@@ -92,5 +103,17 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
     @Override
     public void close() {
 
+    }
+
+    private void init(Class<?> configClass) {
+        // 1.扫描获取所有Bean的Class类型
+        Set<String> beanClassNames = beanDefinitionHandler.scanForClassNames(configClass);
+
+        // 2.创建Bean的定义
+        this.beanDefinitions = beanDefinitionHandler.createBeanDefinitions(beanClassNames);
+    }
+
+    private void refresh(Map<String, BeanDefinition> beanDefinitions) {
+        beanInstanceCreator.createBean(beanDefinitions);
     }
 }

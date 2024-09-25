@@ -1,4 +1,4 @@
-package com.cyk.spring.ioc.context.support.convert.impl;
+package com.cyk.spring.ioc.context.support.bean.definition.assemble.impl;
 
 import com.cyk.spring.ioc.context.annotation.Bean;
 import com.cyk.spring.ioc.context.annotation.Component;
@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
  * @email chen.yukang@qq.com
  * @date 2024/8/3
  */
-public class DefaultBeanDefinitionAssemble extends AbstractBeanDefinitionAssemble {
+public class DefaultBeanDefinitionAssembler extends AbstractBeanDefinitionAssembler {
 
     @Override
     public String getBeanName(Class<?> clazz) {
