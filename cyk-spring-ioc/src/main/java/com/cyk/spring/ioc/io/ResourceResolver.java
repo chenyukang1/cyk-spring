@@ -1,9 +1,10 @@
 package com.cyk.spring.ioc.io;
 
-import com.cyk.spring.ioc.utils.ClassUtils;
 import com.cyk.spring.common.utils.StringUtils;
-import com.cyk.spring.ioc.io.factory.FileScannerFactory;
-import com.cyk.spring.ioc.io.strategy.IFileScanner;
+import com.cyk.spring.ioc.exception.IllegalURIException;
+import com.cyk.spring.ioc.io.scan.FileScanner;
+import com.cyk.spring.ioc.io.scan.JarFileScanner;
+import com.cyk.spring.ioc.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +14,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -33,11 +35,11 @@ public class ResourceResolver {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceResolver.class);
 
     private final String basePackage;
-    private final FileScannerFactory factory;
+    private final FileScanner defaultScanner = new FileScanner();
+    private final JarFileScanner jarFileScanner = new JarFileScanner();
 
     public ResourceResolver(String basePackage) {
         this.basePackage = basePackage;
-        this.factory = new FileScannerFactory();
     }
 
     /**
@@ -84,10 +86,15 @@ public class ResourceResolver {
         while (urls.hasMoreElements()) {
             URL url = urls.nextElement();
             URI uri = url.toURI();
-            String uriStr = StringUtils.removeTrailingSlash(URLDecoder.decode(uri.toString(), "utf-8"));
+            String uriStr = StringUtils.removeTrailingSlash(URLDecoder.decode(uri.toString(), StandardCharsets.UTF_8));
             String uriBaseStr = uriStr.substring(0, uriStr.length() - basePackagePath.length());
 
-            IFileScanner fileScanner = factory.getFileScanner(uriStr);
+            IFileScanner fileScanner;
+            if (uriStr.startsWith("jar:")) {
+                fileScanner = jarFileScanner;
+            } else if (uriStr.startsWith("file:")) {
+                fileScanner = defaultScanner;
+            } else throw new IllegalURIException("Illegal uri!");
             Set<Resource> resourceStream = fileScanner.doFileScan(basePackagePath, uriBaseStr, uri);
             resourceStream.forEach(resource -> {
                 R r = mapper.apply(resource);

@@ -10,6 +10,16 @@ package com.cyk.spring.common.utils;
 public class StringUtils {
 
     /**
+     * Is empty boolean.
+     *
+     * @param str the str
+     * @return the boolean
+     */
+    public static boolean isEmpty(String str) {
+        return str == null || str.isEmpty();
+    }
+
+    /**
      * Remove leading slash string.
      *
      * @param path the path

@@ -1,6 +1,6 @@
 package com.cyk.spring.ioc.utils;
 
-import com.cyk.spring.ioc.context.exception.BeanDefinitionException;
+import com.cyk.spring.ioc.exception.BeanDefinitionException;
 import jakarta.annotation.Nullable;
 
 import java.lang.annotation.Annotation;

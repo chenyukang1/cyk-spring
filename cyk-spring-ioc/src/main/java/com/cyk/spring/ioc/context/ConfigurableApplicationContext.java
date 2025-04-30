@@ -1,6 +1,6 @@
 package com.cyk.spring.ioc.context;
 
-import com.cyk.spring.ioc.context.model.BeanDefinition;
+import com.cyk.spring.ioc.definition.BeanDefinition;
 import jakarta.annotation.Nullable;
 
 import java.util.List;
