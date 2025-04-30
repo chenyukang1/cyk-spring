@@ -1,5 +1,9 @@
 # 手写SpringBoot
 
+## 写在前面
+
+学习一个框架最好的方法是实现一个，起步阶段可以先从 debug 开始，理解原理后自己动手实现
+
 ## 实现IOC容器
 
 | ID  | Problem          | Article                           | 
