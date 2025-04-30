@@ -17,9 +17,9 @@ public class ResourceResolverTest {
 
     @Test
     public void testFileScan() {
-        ResourceResolver resourceResolver = new ResourceResolver("com.cyk.spring.ioc.test.io.scan");
+        ResourceResolver resourceResolver = new ResourceResolver("com.cyk.spring.ioc.test.scan");
         List<String> list = resourceResolver.scan();
-        Assertions.assertEquals(17, list.size());
+        Assertions.assertEquals(20, list.size());
     }
 
     @Test

@@ -1,5 +1,0 @@
-package com.cyk.spring.ioc.test.io.scan.sub1.sub2.sub3;
-
-public class Sub3Bean {
-
-}
