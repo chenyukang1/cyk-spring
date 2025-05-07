@@ -7,7 +7,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * The class ClassUtils.
@@ -101,7 +100,7 @@ public class ClassUtils {
                                         annoClass.getSimpleName(), clazz.getName()));
                     }
                 })
-                .collect(Collectors.toList());
+                .toList();
         if (methods.isEmpty()) {
             return null;
         }
@@ -110,5 +109,14 @@ public class ClassUtils {
         }
         throw new BeanDefinitionException(String.format("Multiple methods with @%s found in class: %s",
                 annoClass.getSimpleName(), clazz.getName()));
+    }
+
+    public static Method getNamedMethod(Class<?> clazz, String methodName) {
+        try {
+            return clazz.getDeclaredMethod(methodName);
+        } catch (NoSuchMethodException e) {
+            throw new BeanDefinitionException(
+                    String.format("Method '%s' not found in class: %s", methodName, clazz.getName()));
+        }
     }
 }

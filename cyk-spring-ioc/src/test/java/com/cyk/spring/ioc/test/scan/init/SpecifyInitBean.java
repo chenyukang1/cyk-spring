@@ -8,12 +8,12 @@ public class SpecifyInitBean {
 
     public String appName;
 
-    SpecifyInitBean(String appTitle, String appVersion) {
+    public SpecifyInitBean(String appTitle, String appVersion) {
         this.appTitle = appTitle;
         this.appVersion = appVersion;
     }
 
-    void init() {
+    public void init() {
         this.appName = this.appTitle + " / " + this.appVersion;
     }
 }

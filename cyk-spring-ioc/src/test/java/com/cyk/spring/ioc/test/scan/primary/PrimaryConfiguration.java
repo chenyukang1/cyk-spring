@@ -9,12 +9,12 @@ public class PrimaryConfiguration {
 
     @Primary
     @Bean
-    DogBean husky() {
+    public DogBean husky() {
         return new DogBean("Husky");
     }
 
     @Bean
-    DogBean teddy() {
+    public DogBean teddy() {
         return new DogBean("Teddy");
     }
 }

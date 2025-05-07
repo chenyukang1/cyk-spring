@@ -5,13 +5,17 @@ import com.cyk.spring.ioc.io.PropertyResolver;
 import com.cyk.spring.ioc.test.scan.ScanApplication;
 import com.cyk.spring.ioc.test.scan.config.ConfigA;
 import com.cyk.spring.ioc.test.scan.config.ConfigB;
+import com.cyk.spring.ioc.test.scan.destroy.AnnotationDestroyBean;
+import com.cyk.spring.ioc.test.scan.destroy.SpecifyDestroyBean;
+import com.cyk.spring.ioc.test.scan.init.AnnotationInitBean;
+import com.cyk.spring.ioc.test.scan.init.SpecifyInitBean;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * The class AnnotationConfigApplicationContextTest
@@ -29,6 +33,36 @@ public class AnnotationConfigApplicationContextTest {
             assertNotNull(ctx.getBean(ConfigA.class));
             assertNotNull(ctx.getBean(ConfigB.class));
         }
+    }
+
+    @Test
+    public void test_init() {
+        try (var ctx = new AnnotationConfigApplicationContext(createPropertyResolver(), ScanApplication.class)) {
+            var annotationInitBean = ctx.getBean(AnnotationInitBean.class);
+            assertNotNull(annotationInitBean);
+            assertNotNull(annotationInitBean.appName);
+
+            var specifyInitBean = ctx.getBean(SpecifyInitBean.class);
+            assertNotNull(specifyInitBean);
+            assertNotNull(specifyInitBean.appName);
+        }
+    }
+
+    @Test
+    public void test_destroy() {
+        AnnotationDestroyBean annotationDestroyBean;
+        SpecifyDestroyBean specifyDestroyBean;
+        try (var ctx = new AnnotationConfigApplicationContext(createPropertyResolver(), ScanApplication.class)) {
+            annotationDestroyBean = ctx.getBean(AnnotationDestroyBean.class);
+            assertNotNull(annotationDestroyBean);
+            assertNotNull(annotationDestroyBean.appTitle);
+
+            specifyDestroyBean = ctx.getBean(SpecifyDestroyBean.class);
+            assertNotNull(specifyDestroyBean);
+            assertNotNull(specifyDestroyBean.appTitle);
+        }
+        assertNull(annotationDestroyBean.appTitle);
+        assertNull(specifyDestroyBean.appTitle);
     }
 
     PropertyResolver createPropertyResolver() {

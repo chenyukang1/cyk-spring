@@ -8,7 +8,7 @@ import com.cyk.spring.ioc.annotation.Value;
 public class SpecifyInitConfiguration {
 
     @Bean(initMethod = "init")
-    SpecifyInitBean createSpecifyInitBean(@Value("${app.title}") String appTitle, @Value("${app.version}") String appVersion) {
+    public SpecifyInitBean createSpecifyInitBean(@Value("${app.title}") String appTitle, @Value("${app.version}") String appVersion) {
         return new SpecifyInitBean(appTitle, appVersion);
     }
 }

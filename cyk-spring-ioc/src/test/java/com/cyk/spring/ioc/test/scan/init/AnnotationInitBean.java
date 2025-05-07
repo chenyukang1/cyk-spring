@@ -16,7 +16,7 @@ public class AnnotationInitBean {
     public String appName;
 
     @PostConstruct
-    void init() {
+    public void init() {
         this.appName = this.appTitle + " / " + this.appVersion;
     }
 }

@@ -1,6 +1,7 @@
 package com.cyk.spring.ioc.definition;
 
 import com.cyk.spring.ioc.exception.BeanCreationException;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import java.lang.reflect.Constructor;
@@ -13,7 +14,7 @@ import java.lang.reflect.Method;
  * @email chen.yukang@qq.com
  * @date 2024/8/3
  */
-public class BeanDefinition {
+public class BeanDefinition implements Comparable<BeanDefinition> {
 
     private final Class<?> beanClass;
     private final String beanName;
@@ -139,5 +140,14 @@ public class BeanDefinition {
                 ", destroyMethod=" + destroyMethod +
                 ", instance=" + instance +
                 '}';
+    }
+
+    @Override
+    public int compareTo(@Nonnull BeanDefinition definition) {
+        int cmp = Integer.compare(this.order, definition.order);
+        if (cmp != 0) {
+            return cmp;
+        }
+        return this.beanName.compareTo(definition.beanName);
     }
 }

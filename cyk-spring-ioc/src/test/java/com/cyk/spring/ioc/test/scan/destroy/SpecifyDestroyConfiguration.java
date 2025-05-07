@@ -8,7 +8,7 @@ import com.cyk.spring.ioc.annotation.Value;
 public class SpecifyDestroyConfiguration {
 
     @Bean(destroyMethod = "destroy")
-    SpecifyDestroyBean createSpecifyDestroyBean(@Value("${app.title}") String appTitle) {
+    public SpecifyDestroyBean createSpecifyDestroyBean(@Value("${app.title}") String appTitle) {
         return new SpecifyDestroyBean(appTitle);
     }
 }
