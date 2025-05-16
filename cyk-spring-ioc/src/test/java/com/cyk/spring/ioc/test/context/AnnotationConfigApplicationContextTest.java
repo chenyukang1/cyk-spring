@@ -9,6 +9,10 @@ import com.cyk.spring.ioc.test.scan.destroy.AnnotationDestroyBean;
 import com.cyk.spring.ioc.test.scan.destroy.SpecifyDestroyBean;
 import com.cyk.spring.ioc.test.scan.init.AnnotationInitBean;
 import com.cyk.spring.ioc.test.scan.init.SpecifyInitBean;
+import com.cyk.spring.ioc.test.scan.proxy.InjectProxyOnConstructorBean;
+import com.cyk.spring.ioc.test.scan.proxy.InjectProxyOnPropertyBean;
+import com.cyk.spring.ioc.test.scan.proxy.OriginBean;
+import com.cyk.spring.ioc.test.scan.proxy.SecondProxyBean;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +67,26 @@ public class AnnotationConfigApplicationContextTest {
         }
         assertNull(annotationDestroyBean.appTitle);
         assertNull(specifyDestroyBean.appTitle);
+    }
+
+    @Test
+    public void test_proxy() {
+        try (var ctx = new AnnotationConfigApplicationContext(createPropertyResolver(), ScanApplication.class)) {
+            // test proxy:
+            OriginBean proxy = ctx.getBean(OriginBean.class);
+            assertSame(SecondProxyBean.class, proxy.getClass());
+            assertEquals("Scan App", proxy.getName());
+            assertEquals("v1.0", proxy.getVersion());
+            // make sure proxy.field is not injected:
+            assertNull(proxy.name);
+            assertNull(proxy.version);
+
+            // other beans are injected proxy instance:
+            var inject1 = ctx.getBean(InjectProxyOnPropertyBean.class);
+            var inject2 = ctx.getBean(InjectProxyOnConstructorBean.class);
+            assertSame(proxy, inject1.injected);
+            assertSame(proxy, inject2.injected);
+        }
     }
 
     PropertyResolver createPropertyResolver() {

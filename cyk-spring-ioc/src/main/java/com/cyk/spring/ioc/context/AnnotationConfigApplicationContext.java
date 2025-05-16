@@ -16,10 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +33,7 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
     protected final IBeanDefinitionHandle beanDefinitionHandler;
     protected final PropertyResolver propertyResolver;
     protected Map<String, BeanDefinition> beanDefinitions;
+    protected List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
     private final Set<String> creatingBeanNames = new HashSet<>();
 
     public AnnotationConfigApplicationContext(PropertyResolver propertyResolver, Class<?> configClass) {
@@ -156,7 +154,10 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
 
     @Override
     public Object createBeanAsEarlySingleton(BeanDefinition definition) {
-        if (definition.getInstance() == null && !creatingBeanNames.add(definition.getBeanName())) {
+        if (definition.getInstance() != null) {
+            return definition.getInstance();
+        }
+        if (!creatingBeanNames.add(definition.getBeanName())) {
             throw new BeanCreationException(String.format(
                     "Circular dependency detected when create bean '%s'", definition.getBeanName()));
         }
@@ -206,6 +207,7 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
                         // 当前依赖Bean尚未初始化，递归调用初始化该依赖Bean
                         autowiredBeanInstance = createBeanAsEarlySingleton(dependsOnDef);
                     }
+                    logger.debug("{} found proxy instance {} when constructor", definition.getBeanName(), autowiredBeanInstance);
                     args[i] = autowiredBeanInstance;
                 } else {
                     args[i] = null;
@@ -223,6 +225,7 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
                     // 当前依赖Bean尚未初始化，递归调用初始化该依赖Bean
                     autowiredBeanInstance = createBeanAsEarlySingleton(dependsOnDef);
                 }
+                logger.debug("{} found proxy instance {} when constructor", definition.getBeanName(), autowiredBeanInstance);
                 args[i] = autowiredBeanInstance;
             }
         }
@@ -250,21 +253,15 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
             }
         }
         definition.setInstance(instance);
-        return instance;
-//
-//        // 调用BeanPostProcessor处理Bean:
-//        for (BeanPostProcessor processor : beanPostProcessors) {
-//            Object processed = processor.postProcessBeforeInitialization(definition.getInstance(), definition.getName());
-//            if (processed == null) {
-//                throw new BeanCreationException(String.format("PostBeanProcessor returns null when process bean '%s' by %s", definition.getName(), processor));
-//            }
-//            // 如果一个BeanPostProcessor替换了原始Bean，则更新Bean的引用:
-//            if (definition.getInstance() != processed) {
-//                logger.atDebug().log("Bean '{}' was replaced by post processor {}.", definition.getName(), processor.getClass().getName());
-//                definition.setInstance(processed);
-//            }
-//        }
-//        return definition.getInstance();
+
+        // 4、调用BeanPostProcessor处理Bean
+        for (BeanPostProcessor processor : beanPostProcessors) {
+            Object proxy = processor.postProcessBeforeInitialization(instance, definition.getBeanName());
+            assert proxy != null;
+            definition.setInstance(proxy);
+        }
+
+        return definition.getInstance();
     }
 
     @Override
@@ -326,30 +323,43 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
                 .sorted()
                 .forEach(this::createBeanAsEarlySingleton);
 
-        // 2、创建普通bean
+        // 2、创建BeanPostProcessor bean
+        beanPostProcessors.addAll(beanDefinitions.values().stream()
+                .filter(beanDefinition -> BeanPostProcessor.class.isAssignableFrom(beanDefinition.getBeanClass()))
+                .sorted()
+                .map(beanDefinition -> (BeanPostProcessor) createBeanAsEarlySingleton(beanDefinition))
+                .toList());
+
+        // 3、创建普通bean
         beanDefinitions.values().stream()
                 .filter(beanDefinition -> beanDefinition.getInstance() == null)
                 .sorted()
                 .forEach(this::createBeanAsEarlySingleton);
 
-        // 3、注入setter/属性值
+        // 4、注入setter/属性值
         beanDefinitions.values().forEach(this::injectBean);
 
-        // 4、调用init方法:
+        // 5、调用init方法:
         beanDefinitions.values().forEach(this::initBean);
     }
 
     void injectBean(BeanDefinition beanDefinition) {
         try {
-            injectProperties(beanDefinition, beanDefinition.getBeanClass(), beanDefinition.getInstance());
+            Object instance = getOriginInstance(beanDefinition);
+            injectProperties(beanDefinition, beanDefinition.getBeanClass(), instance);
         } catch (ReflectiveOperationException e) {
             throw new BeanCreationException(e);
         }
     }
 
     void initBean(BeanDefinition beanDefinition) {
+        Object instance = getOriginInstance(beanDefinition);
         // 调用init方法
-        callMethod(beanDefinition.getInstance(), beanDefinition.getInitMethod(), beanDefinition.getInitMethodName());
+        callMethod(instance, beanDefinition.getInitMethod(), beanDefinition.getInitMethodName());
+        for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
+            Object proxied = beanPostProcessor.postProcessAfterInitialization(beanDefinition.getInstance(), beanDefinition.getBeanName());
+            beanDefinition.setInstance(proxied);
+        }
     }
 
     void injectProperties(BeanDefinition beanDefinition, Class<?> clazz, Object instance) throws ReflectiveOperationException {
@@ -424,6 +434,7 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
                                 clazz.getSimpleName(), accessibleName, beanDefinition.getBeanName(), beanDefinition.getBeanClass().getName()));
             }
             if (depends != null) {
+                logger.debug("{} found proxy instance {} when inject properties", beanDefinition.getBeanName(), depends);
                 if (field != null) {
                     field.set(instance, depends);
                 }
@@ -432,6 +443,20 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
                 }
             }
         }
+    }
+
+    private Object getOriginInstance(BeanDefinition beanDefinition) {
+        // 对代理类的属性注入需要找到原始类
+        Object instance = beanDefinition.getInstance();
+        // 多次代理的类由逆序还原成原始类 A -> proxy B -> proxy C
+        List<BeanPostProcessor> postProcessors = new ArrayList<>(beanPostProcessors);
+        for (int i = postProcessors.size() - 1; i >= 0; i--) {
+            Object origin = postProcessors.get(i).postProcessOnSetProperty(instance, beanDefinition.getBeanName());
+            if (origin != instance) {
+                instance = origin;
+            }
+        }
+        return instance;
     }
 
     void checkFieldOrMethod(Member m) {
