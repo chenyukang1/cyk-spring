@@ -339,13 +339,22 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
         // 4、注入setter/属性值
         beanDefinitions.values().forEach(this::injectBean);
 
+        // 4.1、为ApplicationContextAware注入this指针
+        beanDefinitions.values().stream()
+                .filter(beanDefinition -> ApplicationContextAware.class.isAssignableFrom(beanDefinition.getBeanClass()))
+                .forEach(beanDefinition -> {
+                    Object instance = getProxiedInstance(beanDefinition);
+                    ApplicationContextAware aware = (ApplicationContextAware) instance;
+                    aware.setApplicationContext(this);
+                });
+
         // 5、调用init方法:
         beanDefinitions.values().forEach(this::initBean);
     }
 
     void injectBean(BeanDefinition beanDefinition) {
         try {
-            Object instance = getOriginInstance(beanDefinition);
+            Object instance = getProxiedInstance(beanDefinition);
             injectProperties(beanDefinition, beanDefinition.getBeanClass(), instance);
         } catch (ReflectiveOperationException e) {
             throw new BeanCreationException(e);
@@ -353,7 +362,7 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
     }
 
     void initBean(BeanDefinition beanDefinition) {
-        Object instance = getOriginInstance(beanDefinition);
+        Object instance = getProxiedInstance(beanDefinition);
         // 调用init方法
         callMethod(instance, beanDefinition.getInitMethod(), beanDefinition.getInitMethodName());
         for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
@@ -445,7 +454,7 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
         }
     }
 
-    private Object getOriginInstance(BeanDefinition beanDefinition) {
+    private Object getProxiedInstance(BeanDefinition beanDefinition) {
         // 对代理类的属性注入需要找到原始类
         Object instance = beanDefinition.getInstance();
         // 多次代理的类由逆序还原成原始类 A -> proxy B -> proxy C

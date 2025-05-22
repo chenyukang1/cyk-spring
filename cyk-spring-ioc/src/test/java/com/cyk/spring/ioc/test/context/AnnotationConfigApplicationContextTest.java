@@ -3,6 +3,7 @@ package com.cyk.spring.ioc.test.context;
 import com.cyk.spring.ioc.context.AnnotationConfigApplicationContext;
 import com.cyk.spring.ioc.io.PropertyResolver;
 import com.cyk.spring.ioc.test.scan.ScanApplication;
+import com.cyk.spring.ioc.test.scan.aware.AwareBean;
 import com.cyk.spring.ioc.test.scan.config.ConfigA;
 import com.cyk.spring.ioc.test.scan.config.ConfigB;
 import com.cyk.spring.ioc.test.scan.destroy.AnnotationDestroyBean;
@@ -86,6 +87,14 @@ public class AnnotationConfigApplicationContextTest {
             var inject2 = ctx.getBean(InjectProxyOnConstructorBean.class);
             assertSame(proxy, inject1.injected);
             assertSame(proxy, inject2.injected);
+        }
+    }
+
+    @Test
+    public void test_aware() {
+        try (var ctx = new AnnotationConfigApplicationContext(createPropertyResolver(), ScanApplication.class)) {
+            var aware = ctx.getBean(AwareBean.class);
+            assertSame(ctx, aware.getApplicationContext());
         }
     }
 
