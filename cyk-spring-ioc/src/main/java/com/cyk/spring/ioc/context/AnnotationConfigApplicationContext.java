@@ -96,7 +96,7 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
         if (beanDefinition == null) {
             return null;
         }
-        if (!beanDefinition.getBeanClass().isAssignableFrom(requiredType)) {
+        if (!requiredType.isAssignableFrom(beanDefinition.getBeanClass())) {
             throw new BeanNotOfRequiredTypeException(String.format(
                     "Autowire required type '%s' but bean '%s' has actual type '%s'.",
                     requiredType.getName(), name, beanDefinition.getBeanClass().getName()));
@@ -254,7 +254,10 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
         }
         definition.setInstance(instance);
 
-        // 4、调用BeanPostProcessor处理Bean
+        // 3.3、注入this指针
+
+
+        // 4、调用BeanPostProcessor前置处理Bean
         for (BeanPostProcessor processor : beanPostProcessors) {
             Object proxy = processor.postProcessBeforeInitialization(instance, definition.getBeanName());
             assert proxy != null;
@@ -330,17 +333,28 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
                 .map(beanDefinition -> (BeanPostProcessor) createBeanAsEarlySingleton(beanDefinition))
                 .toList());
 
-        // 3、创建普通bean
+        // 2.1、BeanPostProcessor bean注入this指针
         beanDefinitions.values().stream()
+                .filter(beanDefinition -> beanDefinition.getInstance() != null &&
+                        ApplicationContextAware.class.isAssignableFrom(beanDefinition.getBeanClass()))
+                .forEach(beanDefinition -> {
+                    Object instance = beanDefinition.getInstance();
+                    ApplicationContextAware aware = (ApplicationContextAware) instance;
+                    aware.setApplicationContext(this);
+                });
+
+        // 3、创建普通bean
+        List<BeanDefinition> normalBeans = beanDefinitions.values().stream()
                 .filter(beanDefinition -> beanDefinition.getInstance() == null)
                 .sorted()
-                .forEach(this::createBeanAsEarlySingleton);
+                .toList();
+        normalBeans.forEach(this::createBeanAsEarlySingleton);
 
         // 4、注入setter/属性值
         beanDefinitions.values().forEach(this::injectBean);
 
-        // 4.1、为ApplicationContextAware注入this指针
-        beanDefinitions.values().stream()
+        // 4.1、为普通bean注入this指针
+        normalBeans.stream()
                 .filter(beanDefinition -> ApplicationContextAware.class.isAssignableFrom(beanDefinition.getBeanClass()))
                 .forEach(beanDefinition -> {
                     Object instance = getProxiedInstance(beanDefinition);
