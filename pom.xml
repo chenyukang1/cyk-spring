@@ -12,6 +12,7 @@
         <module>cyk-spring-ioc</module>
         <module>cyk-spring-common</module>
         <module>cyk-spring-aop</module>
+        <module>cyk-spring-jdbc</module>
     </modules>
 
     <properties>
@@ -51,6 +52,12 @@
             <dependency>
                 <groupId>com.cyk.spring.aop</groupId>
                 <artifactId>cyk-spring-aop</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.cyk.spring.transaction</groupId>
+                <artifactId>cyk-spring-jdbc</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
