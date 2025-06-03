@@ -4,7 +4,7 @@
 
 参考自廖大的博客：https://liaoxuefeng.com/books/summerframework/introduction/index.html
 
-学习一个框架最好的方法是实现一个，起步阶段可以先从 debug 开始，理解原理后自己动手实现
+学习一个框架最好的方法是实现一个
 
 ## 实现IOC容器
 

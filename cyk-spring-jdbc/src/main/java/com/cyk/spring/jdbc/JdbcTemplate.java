@@ -15,6 +15,7 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The class JdbcTemplate
@@ -27,13 +28,6 @@ public class JdbcTemplate {
     private static final Logger logger = LoggerFactory.getLogger(JdbcTemplate.class);
 
     private DataSource dataSource;
-
-    private final RowMapper<Boolean> booleanRowMapper = new BasicDataTypeMapper<>();
-    private final RowMapper<Integer> integerRowMapper = new BasicDataTypeMapper<>();
-    private final RowMapper<Float> floatRowMapper = new BasicDataTypeMapper<>();
-    private final RowMapper<Long> longRowMapper = new BasicDataTypeMapper<>();
-    private final RowMapper<Double> doubleRowMapper = new BasicDataTypeMapper<>();
-    private final RowMapper<String> stringRowMapper = new BasicDataTypeMapper<>();
 
     public JdbcTemplate() {
     }
@@ -165,22 +159,9 @@ public class JdbcTemplate {
         });
     }
 
-    @SuppressWarnings("unchecked")
     public <T> List<T> queryForList(String sql, Class<T> clazz, Object... args) throws DataAccessException {
-        if (clazz == Boolean.class || clazz == boolean.class) {
-            return (List<T>) queryForList(sql, booleanRowMapper, args);
-        } else if (clazz == Integer.class || clazz == int.class) {
-            return (List<T>) queryForList(sql, integerRowMapper, args);
-        } else if (clazz == Float.class || clazz == float.class) {
-            return (List<T>) queryForList(sql, floatRowMapper, args);
-        } else if (clazz == Long.class || clazz == long.class) {
-            return (List<T>) queryForList(sql, longRowMapper, args);
-        } else if (clazz == Double.class || clazz == double.class) {
-            return (List<T>) queryForList(sql, doubleRowMapper, args);
-        } else if (clazz == String.class) {
-            return (List<T>) queryForList(sql, stringRowMapper, args);
-        }
-        return queryForList(sql, new BeanRowMapper<>(clazz), args);
+        BasicDataTypeMapper<T> rowMapper = BasicDataTypeMapper.of(clazz);
+        return queryForList(sql, Objects.requireNonNullElseGet(rowMapper, () -> new BeanRowMapper<>(clazz)), args);
     }
 
     public <T> List<T> queryForList(String sql, RowMapper<T> rowMapper, Object... args) throws DataAccessException {
@@ -200,22 +181,9 @@ public class JdbcTemplate {
         });
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T queryForObject(String sql, Class<T> clazz, Object... args) {
-        if (clazz == Boolean.class || clazz == boolean.class) {
-            return (T) queryForObject(sql, booleanRowMapper, args);
-        } else if (clazz == Integer.class || clazz == int.class) {
-            return (T) queryForObject(sql, integerRowMapper, args);
-        } else if (clazz == Float.class || clazz == float.class) {
-            return (T) queryForObject(sql, floatRowMapper, args);
-        } else if (clazz == Long.class || clazz == long.class) {
-            return (T) queryForObject(sql, longRowMapper, args);
-        } else if (clazz == Double.class || clazz == double.class) {
-            return (T) queryForObject(sql, doubleRowMapper, args);
-        } else if (clazz == String.class) {
-            return (T) queryForObject(sql, stringRowMapper, args);
-        }
-        return queryForObject(sql, new BeanRowMapper<>(clazz), args);
+        BasicDataTypeMapper<T> rowMapper = BasicDataTypeMapper.of(clazz);
+        return queryForObject(sql, Objects.requireNonNullElseGet(rowMapper, () -> new BeanRowMapper<>(clazz)), args);
     }
 
     public <T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args) throws DataAccessException {
