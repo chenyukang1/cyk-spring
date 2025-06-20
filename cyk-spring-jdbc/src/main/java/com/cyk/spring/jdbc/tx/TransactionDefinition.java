@@ -221,6 +221,10 @@ public interface TransactionDefinition {
         return false;
     }
 
+    default boolean rollbackOn(Throwable e) {
+        return false;
+    }
+
     @Nullable
     default String getName() {
         return null;

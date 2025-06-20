@@ -26,6 +26,10 @@ public class TransactionObject {
         return connection;
     }
 
+    public void releaseConnection() {
+        connectionHolder.remove();;
+    }
+
     public void setConnection(Connection connection) {
         connectionHolder.set(connection);
     }

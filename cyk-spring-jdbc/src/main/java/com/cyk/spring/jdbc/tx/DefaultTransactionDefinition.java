@@ -36,6 +36,8 @@ public class DefaultTransactionDefinition implements TransactionDefinition {
 
     private int timeout = -1;
 
+    private Class<? extends Throwable>[] rollbackFor;
+
     @Override
     public int getPropagationBehavior() {
         return propagationBehavior;
@@ -92,5 +94,26 @@ public class DefaultTransactionDefinition implements TransactionDefinition {
 
     public void setTimeout(int timeout) {
         this.timeout = timeout;
+    }
+
+    @Override
+    public boolean rollbackOn(Throwable ex) {
+        if (rollbackFor == null) {
+            return ex instanceof RuntimeException || ex instanceof Error;
+        }
+        for (Class<? extends Throwable> rb : rollbackFor) {
+            if (rb.isInstance(ex)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Class<? extends Throwable>[] getRollbackFor() {
+        return rollbackFor;
+    }
+
+    public void setRollbackFor(Class<? extends Throwable>[] rollbackFor) {
+        this.rollbackFor = rollbackFor;
     }
 }

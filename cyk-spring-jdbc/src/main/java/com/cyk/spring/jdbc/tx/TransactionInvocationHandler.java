@@ -5,6 +5,8 @@ import com.cyk.spring.jdbc.tx.annotation.Transactional;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * The class TransactionInvocationHandler
@@ -27,10 +29,58 @@ public class TransactionInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Transactional transactional = method.getAnnotatedReturnType().getAnnotation(Transactional.class);
-        TransactionDefinition definition = determinTransactionDefinition(transactional);
-        TransactionInfo txInfo = createTransactionIfNecessary(ptm, definition);
-        return null;
+        TransactionInfo txInfo = transactionInfoHolder.get();
+        if (txInfo == null) {
+            try {
+                Transactional transactional = method.getAnnotatedReturnType().getAnnotation(Transactional.class);
+                TransactionDefinition definition = determinTransactionDefinition(transactional);
+                TransactionInfo newInfo = createTransactionIfNecessary(ptm, definition);
+                transactionInfoHolder.set(newInfo);
+
+                Object res = null;
+                try {
+                    res = method.invoke(proxy, args);
+                } catch (Throwable e) {
+                    if (newInfo != null && newInfo.getTransactionStatus() != null) {
+                        if (definition.rollbackOn(e)) {
+                            newInfo.getTransactionManager().rollback(newInfo.getTransactionStatus());
+                        } else {
+                            newInfo.getTransactionManager().commit(newInfo.getTransactionStatus());
+                        }
+                        throw e;
+                    }
+                } finally {
+                    if (newInfo != null) {
+                        newInfo.restoreThreadLocalStatus();
+                    }
+                }
+
+                if (res != null && newInfo.getTransactionStatus() != null) {
+                    TransactionStatus status = newInfo.getTransactionStatus();
+                    if (res instanceof Future<?> future && future.isDone()) {
+                        try {
+                            future.get();
+                        } catch (ExecutionException ex) {
+                            Throwable cause = ex.getCause();
+                            if (cause != null && definition.rollbackOn(cause)) {
+                                status.setRollbackOnly();
+                            }
+                        } catch (InterruptedException ex) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                }
+
+                if (newInfo != null && newInfo.getTransactionStatus() != null) {
+                    newInfo.getTransactionManager().commit(newInfo.getTransactionStatus());
+                }
+                return res;
+            } finally {
+                transactionInfoHolder.remove();
+            }
+        } else {
+            return method.invoke(proxy, args);
+        }
     }
 
     protected TransactionDefinition determinTransactionDefinition(Transactional transactional) {
@@ -42,6 +92,7 @@ public class TransactionInvocationHandler implements InvocationHandler {
         definition.setIsolationLevel(transactional.isolation());
         definition.setTimeout(transactional.timeout());
         definition.setPropagationBehavior(transactional.propagation());
+        definition.setRollbackFor(transactional.rollbackFor());
         definition.setReadOnly(false);
         return definition;
     }
@@ -77,6 +128,12 @@ public class TransactionInvocationHandler implements InvocationHandler {
         public void bindToThread() {
             this.oldTransactionInfo = transactionInfoHolder.get();
             transactionInfoHolder.set(this);
+        }
+
+        private void restoreThreadLocalStatus() {
+            // Use stack to restore old transaction TransactionInfo.
+            // Will be null if none was set.
+            transactionInfoHolder.set(this.oldTransactionInfo);
         }
 
         public TransactionStatus getTransactionStatus() {

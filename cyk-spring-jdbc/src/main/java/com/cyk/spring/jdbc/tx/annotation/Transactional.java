@@ -40,4 +40,11 @@ public @interface Transactional {
      * @return the int
      */
     int timeout() default TransactionDefinition.TIMEOUT_DEFAULT;
+
+    /**
+     * 发生何异常时事务回滚
+     *
+     * @return class
+     */
+    Class<? extends Throwable>[] rollbackFor() default {};
 }

@@ -1,6 +1,7 @@
 package com.cyk.spring.jdbc.tx;
 
 import com.cyk.spring.jdbc.exception.DataAccessException;
+import com.cyk.spring.jdbc.exception.IllegalTransactionStateException;
 import com.cyk.spring.jdbc.exception.TransactionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,9 @@ public class DataSourceTransactionManager implements PlatformTransactionManager 
                 definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
                 definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
             // 开启事务
+            DefaultTransactionStatus status = new DefaultTransactionStatus(txObject, true);
             try {
+                // 由 JDBC 驱动自动在需要时发出事务开始语句
                 if (conn.getAutoCommit()) {
                     conn.setAutoCommit(false);
                 }
@@ -63,6 +66,7 @@ public class DataSourceTransactionManager implements PlatformTransactionManager 
                 if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
                     txObject.setTimeoutInSeconds(timeout);
                 }
+                return status;
             } catch (Exception e) {
                 if (conn != null) {
                     try {
@@ -73,25 +77,56 @@ public class DataSourceTransactionManager implements PlatformTransactionManager 
                 }
                 throw new TransactionException("begin transaction fail", e);
             }
-
-
-        } else throw new TransactionException("propagation " + definition.getPropagationBehavior() + " not supported");
-
-        return null;
+        }
+        throw new TransactionException("propagation " + definition.getPropagationBehavior() + " not supported");
     }
 
     @Override
     public void commit(TransactionStatus status) throws TransactionException {
-
+        if (status.isRollbackOnly()) {
+            processRollback(status);
+        } else {
+            processCommit(status);
+        }
     }
 
     @Override
     public void rollback(TransactionStatus status) throws TransactionException {
-
+        if (status.isCompleted()) {
+            throw new IllegalTransactionStateException(
+                    "Transaction is already completed - do not call commit or rollback more than once per transaction");
+        }
+        processRollback(status);
     }
 
-    void doBegin() {
+    private void processRollback(TransactionStatus status) {
+        DefaultTransactionStatus defaultStatus = (DefaultTransactionStatus) status;
+        TransactionObject txObject = defaultStatus.getTransaction();
+        Connection conn = txObject.getConnection();
+        try {
+            conn.rollback();
+            conn.close();
+            txObject.releaseConnection();
+        } catch (SQLException e) {
+            throw new TransactionException("rollback transaction fail", e);
+        } finally {
+            defaultStatus.setCompleted();
+        }
+    }
 
+    private void processCommit(TransactionStatus status) {
+        DefaultTransactionStatus defaultStatus = (DefaultTransactionStatus) status;
+        TransactionObject txObject = defaultStatus.getTransaction();
+        Connection conn = txObject.getConnection();
+        try {
+            conn.commit();
+            conn.close();
+            txObject.releaseConnection();
+        } catch (SQLException e) {
+            throw new TransactionException("commit transaction fail", e);
+        } finally {
+            defaultStatus.setCompleted();
+        }
     }
 
     public DataSource getDataSource() {
