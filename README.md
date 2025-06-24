@@ -6,7 +6,7 @@
 
 学习一个框架最好的方法是实现一个
 
-## 实现IOC容器
+## 实现思路
 
 | ID  | Problem             | Article                             | 
 |-----|---------------------|:------------------------------------|
@@ -16,3 +16,4 @@
 | 003 | 实现BeanPostProcessor | [解决思路](/doc/bean-post-processor.md) |
 | 004 | 实现AOP               | [解决思路](/doc/spring-aop.md)          |
 | 005 | 实现JDBCTemplate      | [解决思路](/doc/jdbc-template.md)       |
+| 006 | 实现事务                | [解决思路](/doc/spring-tx.md)           |
