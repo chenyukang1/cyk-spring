@@ -51,7 +51,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition {
         if (propagation == null) {
             throw new IllegalArgumentException("'propagation' cannot be null");
         }
-        Integer propagationBehavior = propagationConstants.get(propagation.name());
+        Integer propagationBehavior = propagationConstants.get("PROPAGATION_" + propagation.name());
         if (propagationBehavior == null) {
             throw new IllegalArgumentException("'propagation' is not a valid propagation behavior");
         }
@@ -71,7 +71,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition {
         if (isolation == null) {
             throw new IllegalArgumentException("'isolation' cannot be null");
         }
-        Integer isolationLevel = isolationConstants.get(isolation.name());
+        Integer isolationLevel = isolationConstants.get("ISOLATION_" + isolation.name());
         if (isolationLevel == null) {
             throw new IllegalArgumentException("'isolation' is not a valid isolation level");
         }

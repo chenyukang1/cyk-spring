@@ -21,7 +21,6 @@ public class DataSourceTransactionManager implements PlatformTransactionManager 
 
     private static final Logger log = LoggerFactory.getLogger(DataSourceTransactionManager.class);
     private DataSource dataSource;
-    private static final ThreadLocal<TransactionStatus> transactionStatus = new ThreadLocal<>();
 
     public DataSourceTransactionManager() {
     }

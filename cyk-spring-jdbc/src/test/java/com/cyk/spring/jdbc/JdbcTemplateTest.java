@@ -1,7 +1,7 @@
 package com.cyk.spring.jdbc;
 
 import com.cyk.spring.ioc.context.AnnotationConfigApplicationContext;
-import com.cyk.spring.jdbc.pojo.User;
+import com.cyk.spring.jdbc.tx.pojo.User;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

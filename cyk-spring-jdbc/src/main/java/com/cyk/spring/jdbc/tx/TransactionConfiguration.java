@@ -2,6 +2,9 @@ package com.cyk.spring.jdbc.tx;
 
 import com.cyk.spring.ioc.annotation.Bean;
 import com.cyk.spring.ioc.annotation.Configuration;
+import com.cyk.spring.ioc.annotation.Order;
+
+import javax.sql.DataSource;
 
 /**
  * The class TransactionConfiguration
@@ -18,6 +21,12 @@ public class TransactionConfiguration {
     }
 
     @Bean
+    public PlatformTransactionManager platformTransactionManager(DataSource dataSource) {
+        return new DataSourceTransactionManager(dataSource);
+    }
+
+    @Bean
+    @Order(10000)
     public TransactionInvocationHandler transactionInvocationHandler(PlatformTransactionManager transactionManager) {
         return new TransactionInvocationHandler(transactionManager);
     }

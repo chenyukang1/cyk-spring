@@ -311,6 +311,41 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
         return (T) def.getRequiredInstance();
     }
 
+    /**
+     * findBean与getBean类似，但是返回null，不抛异常
+     *
+     * @param <T>          the type parameter
+     * @param name         the name
+     * @param requiredType the required type
+     * @return the t
+     */
+    @Nullable
+    @SuppressWarnings("unchecked")
+    protected <T> T findProxiedBean(String name, Class<T> requiredType) {
+        BeanDefinition def = findBeanDefinition(name, requiredType);
+        if (def == null) {
+            return null;
+        }
+        return (T) getProxiedInstance(def);
+    }
+
+    /**
+     * findBean与getBean类似，但是返回null，不抛异常
+     *
+     * @param <T>          the type parameter
+     * @param requiredType the required type
+     * @return the t
+     */
+    @Nullable
+    @SuppressWarnings("unchecked")
+    protected <T> T findProxiedBean(Class<T> requiredType) {
+        BeanDefinition def = findBeanDefinition(requiredType);
+        if (def == null) {
+            return null;
+        }
+        return (T) getProxiedInstance(def);
+    }
+
     private void init(Class<?> configClass) {
         // 1.扫描获取所有Bean的Class类型
         Set<String> beanClassNames = beanDefinitionHandler.scanForClassNames(configClass);
@@ -450,6 +485,7 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
         if (autowired != null) {
             String name = autowired.name();
             boolean required = autowired.value();
+//            Object depends = name.isEmpty() ? findProxiedBean(accessibleType) : findProxiedBean(name, accessibleType);
             Object depends = name.isEmpty() ? findBean(accessibleType) : findBean(name, accessibleType);
             if (required && depends == null) {
                 throw new UnsatisfiedDependencyException(

@@ -3,6 +3,7 @@ package com.cyk.spring.jdbc;
 import com.cyk.spring.jdbc.exception.DataAccessException;
 import com.cyk.spring.jdbc.mapper.BasicDataTypeMapper;
 import com.cyk.spring.jdbc.mapper.BeanRowMapper;
+import com.cyk.spring.jdbc.tx.TransactionInvocationHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,103 +37,117 @@ public class JdbcTemplate {
     }
 
     public <T> T execute(ConnectionCallback<T> callback) {
-        assert dataSource != null;
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            return callback.doInConnection(connection);
-        } catch (SQLException e) {
+        Connection current = TransactionInvocationHandler.getConnection();
+        if (current != null) {
             try {
-                connection.close();
-            } catch (SQLException ex) {
-                logger.error("JDBC Connection {} close fail", connection, ex);
-            }
-            connection = null;
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    logger.error("JDBC Connection {} close fail", connection, e);
-                }
+                return callback.doInConnection(current);
+            } catch (Exception e) {
+                throw new DataAccessException(e);
             }
         }
-        return null;
+
+        assert dataSource != null;
+        try (Connection newConn = dataSource.getConnection()) {
+            return callback.doInConnection(newConn);
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        }
     }
 
     public <T> T execute(StatementCallback<T> callback) {
-        assert dataSource != null;
-        Connection conn = null;
-        Statement stmt = null;
-        try {
-            conn = dataSource.getConnection();
-            stmt = conn.createStatement();
-            return callback.doInStatement(stmt);
-        } catch (SQLException e) {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException ex) {
-                    logger.error("JDBC Statement {} close fail", stmt, ex);
-                }
-            }
-            stmt = null;
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException ex) {
-                    logger.error("JDBC Connection {} close fail", conn, ex);
-                }
-            }
-            conn = null;
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    logger.error("JDBC Connection {} close fail", conn, e);
-                }
+        Connection current = TransactionInvocationHandler.getConnection();
+        Statement statement = null;
+        if (current != null) {
+            try {
+                statement = current.createStatement();
+                return callback.doInStatement(statement);
+            } catch (SQLException e) {
+                releaseConnection(null, statement);
+                throw new DataAccessException(e);
             }
         }
-        return null;
+
+        assert dataSource != null;
+        try (Connection newConn = TransactionInvocationHandler.getConnection();
+             Statement stmt = newConn.createStatement()) {
+            return callback.doInStatement(stmt);
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        }
     }
 
     public <T> T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> callback) {
-        assert dataSource != null;
-        Connection conn = null;
+        Connection current = TransactionInvocationHandler.getConnection();
         PreparedStatement ptmt = null;
-        try {
-            conn = dataSource.getConnection();
-            ptmt = psc.createPreparedStatement(conn);
-            return callback.doInPreparedStatement(ptmt);
-        } catch (SQLException e) {
-            logger.error("JDBC Statement execute fail", e);
-            if (ptmt != null) {
-                try {
-                    ptmt.close();
-                } catch (SQLException ex) {
-                    logger.error("JDBC Statement {} close fail", ptmt, ex);
-                }
-            }
-            ptmt = null;
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException ex) {
-                    logger.error("JDBC Connection {} close fail", conn, ex);
-                }
-            }
-            conn = null;
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    logger.error("JDBC Connection {} close fail", conn, e);
-                }
+        if (current != null) {
+            try {
+                ptmt = psc.createPreparedStatement(current);
+                return callback.doInPreparedStatement(ptmt);
+            } catch (SQLException e) {
+                releaseConnection(null, ptmt);
+                throw new DataAccessException(e);
             }
         }
-        return null;
+
+        assert dataSource != null;
+        // 当前事务中没有，创建新连接
+        try (Connection newConn = dataSource.getConnection();
+             PreparedStatement pstmt = psc.createPreparedStatement(newConn)) {
+            if (!newConn.getAutoCommit()) {
+                newConn.setAutoCommit(true);
+            }
+            T result = callback.doInPreparedStatement(pstmt);
+            if (!newConn.getAutoCommit()) {
+                newConn.setAutoCommit(false);
+            }
+            return result;
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        }
+    }
+
+    private void releaseConnection(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException ex) {
+                logger.error("JDBC Connection {} close fail", conn, ex);
+            }
+        }
+    }
+
+    private void releaseConnection(Connection conn, Statement stmt) {
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (SQLException ex) {
+                logger.error("JDBC Statement {} close fail", stmt, ex);
+            }
+        }
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException ex) {
+                logger.error("JDBC Connection {} close fail", conn, ex);
+            }
+        }
+    }
+
+    private void releaseConnection(Connection conn, PreparedStatement ptmt) {
+        if (ptmt != null) {
+            try {
+                ptmt.close();
+            } catch (SQLException ex) {
+                logger.error("JDBC Statement {} close fail", ptmt, ex);
+            }
+        }
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException ex) {
+                logger.error("JDBC Connection {} close fail", conn, ex);
+            }
+        }
     }
 
     public int update(String sql, Object... args) throws DataAccessException {

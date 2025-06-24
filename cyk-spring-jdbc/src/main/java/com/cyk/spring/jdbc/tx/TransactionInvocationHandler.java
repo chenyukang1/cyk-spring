@@ -1,10 +1,13 @@
 package com.cyk.spring.jdbc.tx;
 
+import com.cyk.spring.ioc.utils.ClassUtils;
 import com.cyk.spring.jdbc.exception.TransactionException;
 import com.cyk.spring.jdbc.tx.annotation.Transactional;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -32,7 +35,7 @@ public class TransactionInvocationHandler implements InvocationHandler {
         TransactionInfo txInfo = transactionInfoHolder.get();
         if (txInfo == null) {
             try {
-                Transactional transactional = method.getAnnotatedReturnType().getAnnotation(Transactional.class);
+                Transactional transactional = ClassUtils.findAnnotation(proxy.getClass(), Transactional.class);
                 TransactionDefinition definition = determinTransactionDefinition(transactional);
                 TransactionInfo newInfo = createTransactionIfNecessary(ptm, definition);
                 transactionInfoHolder.set(newInfo);
@@ -47,7 +50,7 @@ public class TransactionInvocationHandler implements InvocationHandler {
                         } else {
                             newInfo.getTransactionManager().commit(newInfo.getTransactionStatus());
                         }
-                        throw e;
+                        throw new TransactionException("invoke fail", e);
                     }
                 } finally {
                     if (newInfo != null) {
@@ -109,6 +112,18 @@ public class TransactionInvocationHandler implements InvocationHandler {
 
     public void setTransactionManager(PlatformTransactionManager transactionManager) {
         this.ptm = transactionManager;
+    }
+
+    public static Connection getConnection() {
+        TransactionInfo txInfo = transactionInfoHolder.get();
+        if (txInfo == null) {
+            return null;
+        }
+        return Optional.ofNullable(txInfo.getTransactionStatus())
+                .map(status -> (DefaultTransactionStatus) status)
+                .map(DefaultTransactionStatus::getTransaction)
+                .map(TransactionObject::getConnection)
+                .orElse(null);
     }
 
     protected static final class TransactionInfo {
