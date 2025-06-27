@@ -19,7 +19,8 @@ public class JdbcTemplateTest extends JdbcTestBase {
 
     @Test
     public void test_JdbcTemplate() {
-        try (var context = new AnnotationConfigApplicationContext(createPropertyResolver(), JdbcTestApplication.class)) {
+        try (var context = new AnnotationConfigApplicationContext(JdbcTestApplication.class,
+                createPropertyResolver())) {
             var jdbcTemplate = context.getBean(JdbcTemplate.class);
             jdbcTemplate.update(CREATE_USER);
             jdbcTemplate.update(CREATE_ADDRESS);

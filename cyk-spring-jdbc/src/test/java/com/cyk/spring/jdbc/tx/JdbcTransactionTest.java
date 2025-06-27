@@ -28,7 +28,7 @@ public class JdbcTransactionTest extends JdbcTestBase {
 
     @Test
     public void testTx() {
-        try (var ctx = new AnnotationConfigApplicationContext(createPropertyResolver(), JdbcTestApplication.class)) {
+        try (var ctx = new AnnotationConfigApplicationContext(JdbcTestApplication.class, createPropertyResolver())) {
             JdbcTemplate jdbcTemplate = ctx.getBean(JdbcTemplate.class);
             jdbcTemplate.update(CREATE_USER);
             jdbcTemplate.update(CREATE_ADDRESS);
@@ -72,7 +72,7 @@ public class JdbcTransactionTest extends JdbcTestBase {
             assertEquals(2, addressService.getAddresses(bob.id).size());
         }
         // re-open db and query:
-        try (var ctx = new AnnotationConfigApplicationContext(createPropertyResolver(), JdbcTestApplication.class)) {
+        try (var ctx = new AnnotationConfigApplicationContext(JdbcTestApplication.class, createPropertyResolver())) {
             AddressService addressService = ctx.getBean(AddressService.class);
             List<Address> addressesOfBob = addressService.getAddresses(1);
             assertEquals(2, addressesOfBob.size());

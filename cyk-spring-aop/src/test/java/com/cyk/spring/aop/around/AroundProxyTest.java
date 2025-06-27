@@ -12,7 +12,7 @@ public class AroundProxyTest {
 
     @Test
     public void testAroundProxy() {
-        try (var ctx = new AnnotationConfigApplicationContext(createPropertyResolver(), AroundApplication.class)) {
+        try (var ctx = new AnnotationConfigApplicationContext(AroundApplication.class, createPropertyResolver())) {
             OriginBean proxy = ctx.getBean(OriginBean.class);
             // OriginBean$ByteBuddy$8NoD1FcQ
             System.out.println(proxy.getClass().getName());

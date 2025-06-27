@@ -34,7 +34,7 @@ public class AnnotationConfigApplicationContextTest {
 
     @Test
     public void test_configuration() {
-        try (var ctx = new AnnotationConfigApplicationContext(createPropertyResolver(), ScanApplication.class)) {
+        try (var ctx = new AnnotationConfigApplicationContext(ScanApplication.class, createPropertyResolver())) {
             assertNotNull(ctx.getBean(ConfigA.class));
             assertNotNull(ctx.getBean(ConfigB.class));
         }
@@ -42,7 +42,7 @@ public class AnnotationConfigApplicationContextTest {
 
     @Test
     public void test_init() {
-        try (var ctx = new AnnotationConfigApplicationContext(createPropertyResolver(), ScanApplication.class)) {
+        try (var ctx = new AnnotationConfigApplicationContext(ScanApplication.class, createPropertyResolver())) {
             var annotationInitBean = ctx.getBean(AnnotationInitBean.class);
             assertNotNull(annotationInitBean);
             assertNotNull(annotationInitBean.appName);
@@ -57,7 +57,7 @@ public class AnnotationConfigApplicationContextTest {
     public void test_destroy() {
         AnnotationDestroyBean annotationDestroyBean;
         SpecifyDestroyBean specifyDestroyBean;
-        try (var ctx = new AnnotationConfigApplicationContext(createPropertyResolver(), ScanApplication.class)) {
+        try (var ctx = new AnnotationConfigApplicationContext(ScanApplication.class, createPropertyResolver())) {
             annotationDestroyBean = ctx.getBean(AnnotationDestroyBean.class);
             assertNotNull(annotationDestroyBean);
             assertNotNull(annotationDestroyBean.appTitle);
@@ -72,7 +72,7 @@ public class AnnotationConfigApplicationContextTest {
 
     @Test
     public void test_proxy() {
-        try (var ctx = new AnnotationConfigApplicationContext(createPropertyResolver(), ScanApplication.class)) {
+        try (var ctx = new AnnotationConfigApplicationContext(ScanApplication.class, createPropertyResolver())) {
             // test proxy:
             OriginBean proxy = ctx.getBean(OriginBean.class);
             assertSame(SecondProxyBean.class, proxy.getClass());
@@ -92,7 +92,7 @@ public class AnnotationConfigApplicationContextTest {
 
     @Test
     public void test_aware() {
-        try (var ctx = new AnnotationConfigApplicationContext(createPropertyResolver(), ScanApplication.class)) {
+        try (var ctx = new AnnotationConfigApplicationContext(ScanApplication.class, createPropertyResolver())) {
             var aware = ctx.getBean(AwareBean.class);
             assertSame(ctx, aware.getApplicationContext());
         }

@@ -36,13 +36,13 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
     protected List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
     private final Set<String> creatingBeanNames = new HashSet<>();
 
-    public AnnotationConfigApplicationContext(PropertyResolver propertyResolver, Class<?> configClass) {
-        this(new DefaultBeanDefinitionHandle(), propertyResolver, configClass);
+    public AnnotationConfigApplicationContext(Class<?> configClass, PropertyResolver propertyResolver) {
+        this(configClass, propertyResolver, new DefaultBeanDefinitionHandle());
     }
 
-    public AnnotationConfigApplicationContext(IBeanDefinitionHandle beanDefinitionHandler,
+    public AnnotationConfigApplicationContext(Class<?> configClass,
                                               PropertyResolver propertyResolver,
-                                              Class<?> configClass) {
+                                              IBeanDefinitionHandle beanDefinitionHandler) {
         this.beanDefinitionHandler = beanDefinitionHandler;
         this.propertyResolver = propertyResolver;
 
