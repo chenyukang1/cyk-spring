@@ -13,6 +13,7 @@
         <module>cyk-spring-common</module>
         <module>cyk-spring-aop</module>
         <module>cyk-spring-jdbc</module>
+        <module>cyk-spring-web</module>
     </modules>
 
     <properties>
@@ -175,21 +176,6 @@
                             <configuration>
                                 <doclint>none</doclint>
                             </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <version>3.0.1</version>
-                    <executions>
-                        <execution>
-                            <id>sign-artifacts</id>
-                            <phase>verify</phase>
-                            <goals>
-                                <goal>sign</goal>
-                            </goals>
                         </execution>
                     </executions>
                 </plugin>
