@@ -1,14 +1,10 @@
-package com.cyk.spring.ioc.definition.handle;
+package com.cyk.spring.ioc.definition;
 
 import com.cyk.spring.ioc.annotation.Component;
 import com.cyk.spring.ioc.annotation.ComponentScan;
 import com.cyk.spring.ioc.annotation.Configuration;
 import com.cyk.spring.ioc.annotation.Import;
 import com.cyk.spring.ioc.exception.BeanCreationException;
-import com.cyk.spring.ioc.definition.BeanDefinition;
-import com.cyk.spring.ioc.definition.IBeanDefinitionAssemble;
-import com.cyk.spring.ioc.definition.IBeanDefinitionHandle;
-import com.cyk.spring.ioc.definition.assemble.DefaultBeanDefinitionAssemble;
 import com.cyk.spring.ioc.io.ResourceResolver;
 import com.cyk.spring.ioc.utils.ClassUtils;
 import org.slf4j.Logger;

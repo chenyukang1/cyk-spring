@@ -1,4 +1,4 @@
-package com.cyk.spring.ioc.definition.assemble;
+package com.cyk.spring.ioc.definition;
 
 import com.cyk.spring.ioc.annotation.Bean;
 import com.cyk.spring.ioc.annotation.Component;

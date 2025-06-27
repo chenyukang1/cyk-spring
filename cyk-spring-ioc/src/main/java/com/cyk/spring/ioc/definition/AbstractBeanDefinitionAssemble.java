@@ -1,9 +1,7 @@
-package com.cyk.spring.ioc.definition.assemble;
+package com.cyk.spring.ioc.definition;
 
 import com.cyk.spring.ioc.annotation.Bean;
 import com.cyk.spring.ioc.exception.BeanDefinitionException;
-import com.cyk.spring.ioc.definition.BeanDefinition;
-import com.cyk.spring.ioc.definition.IBeanDefinitionAssemble;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

@@ -6,7 +6,7 @@ import com.cyk.spring.ioc.annotation.Configuration;
 import com.cyk.spring.ioc.annotation.Value;
 import com.cyk.spring.ioc.definition.BeanDefinition;
 import com.cyk.spring.ioc.definition.IBeanDefinitionHandle;
-import com.cyk.spring.ioc.definition.handle.DefaultBeanDefinitionHandle;
+import com.cyk.spring.ioc.definition.DefaultBeanDefinitionHandle;
 import com.cyk.spring.ioc.exception.*;
 import com.cyk.spring.ioc.io.PropertyResolver;
 import com.cyk.spring.ioc.utils.ClassUtils;
