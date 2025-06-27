@@ -1,10 +1,10 @@
 package com.cyk.spring.ioc.io;
 
-import com.cyk.spring.common.utils.StringUtils;
 import com.cyk.spring.ioc.exception.IllegalURIException;
 import com.cyk.spring.ioc.io.scan.FileScanner;
 import com.cyk.spring.ioc.io.scan.JarFileScanner;
 import com.cyk.spring.ioc.utils.ClassUtils;
+import com.cyk.spring.ioc.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

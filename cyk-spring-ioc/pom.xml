@@ -22,11 +22,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.cyk.spring.common</groupId>
-            <artifactId>cyk-spring-common</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
         </dependency>

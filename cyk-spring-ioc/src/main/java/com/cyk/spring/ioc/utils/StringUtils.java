@@ -1,4 +1,4 @@
-package com.cyk.spring.common.utils;
+package com.cyk.spring.ioc.utils;
 
 /**
  * The class StringUtils.

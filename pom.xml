@@ -10,7 +10,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>cyk-spring-ioc</module>
-        <module>cyk-spring-common</module>
         <module>cyk-spring-aop</module>
         <module>cyk-spring-jdbc</module>
         <module>cyk-spring-web</module>
@@ -38,12 +37,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.cyk.spring.common</groupId>
-                <artifactId>cyk-spring-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>com.cyk.spring.ioc</groupId>
                 <artifactId>cyk-spring-ioc</artifactId>

@@ -26,11 +26,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.cyk.spring.common</groupId>
-            <artifactId>cyk-spring-common</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
