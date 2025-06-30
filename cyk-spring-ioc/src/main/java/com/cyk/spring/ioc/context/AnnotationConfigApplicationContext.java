@@ -254,9 +254,6 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
         }
         definition.setInstance(instance);
 
-        // 3.3、注入this指针
-
-
         // 4、调用BeanPostProcessor前置处理Bean
         for (BeanPostProcessor processor : beanPostProcessors) {
             Object proxy = processor.postProcessBeforeInitialization(instance, definition.getBeanName());
@@ -346,6 +343,10 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
         return (T) getProxiedInstance(def);
     }
 
+    protected List<BeanPostProcessor> postBeanPostProcessors() {
+        return new ArrayList<>();
+    }
+
     private void init(Class<?> configClass) {
         // 1.扫描获取所有Bean的Class类型
         Set<String> beanClassNames = beanDefinitionHandler.scanForClassNames(configClass);
@@ -367,6 +368,11 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
                 .sorted()
                 .map(beanDefinition -> (BeanPostProcessor) createBeanAsEarlySingleton(beanDefinition))
                 .toList());
+
+        // 扩展BeanPostProcessor
+        List<BeanPostProcessor> processors = postBeanPostProcessors();
+        assert processors != null;
+        beanPostProcessors.addAll(processors);
 
         // 2.1、BeanPostProcessor bean注入this指针
         beanDefinitions.values().stream()

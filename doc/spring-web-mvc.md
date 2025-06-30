@@ -13,3 +13,7 @@ Servlet 规范定义的组件有 3 类：
 
 这三块功能实现后，把 cyk-spring-web 模块打成 war 包，放到 Tomcat 的 webapps 目录下，启动 Tomcat，可以看到 IOC 容器成功加载，application.yml
 中的配置被成功读出，基本的架子就完成了
+
+Web 模块需要把 ServletContext 注入 IOC 容器以便对 ServletContext 进行操作，比如获取资源、注册 Filter 等。为此需要扩展 ApplicationContext
+接口，实现 WebApplicationContext 接口和 ServletContextAware 接口。WebApplicationContext 初始化 -> 注入 ServletContext -> 
+ServletContextAware Bean 注入 ServletContext -> IOC 容器初始化完成

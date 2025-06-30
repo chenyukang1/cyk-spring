@@ -1,10 +1,11 @@
 package com.cyk.spring.web;
 
-import com.cyk.spring.ioc.context.AnnotationConfigApplicationContext;
 import com.cyk.spring.ioc.context.ApplicationContext;
 import com.cyk.spring.ioc.io.PropertyResolver;
 import com.cyk.spring.ioc.utils.StringUtils;
 import com.cyk.spring.ioc.utils.YamlUtils;
+import com.cyk.spring.web.context.AnnotationConfigWebApplicationContext;
+import com.cyk.spring.web.context.WebApplicationContext;
 import com.cyk.spring.web.exception.ApplicationContextInitException;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
@@ -33,7 +34,7 @@ public class ApplicationContextLifecycleListener implements ServletContextListen
         if (StringUtils.isEmpty(configClassName)) {
             throw new ApplicationContextInitException("Missing init parameter: configClassName");
         }
-        ApplicationContext applicationContext = createApplicationContext(configClassName);
+        WebApplicationContext applicationContext = createApplicationContext(configClassName, servletContext);
         servletContext.setAttribute("applicationContext", applicationContext);
 
         DispatcherServlet dispatcherServlet = new DispatcherServlet();
@@ -51,14 +52,16 @@ public class ApplicationContextLifecycleListener implements ServletContextListen
         }
     }
 
-    private ApplicationContext createApplicationContext(String configClassName) {
+    private WebApplicationContext createApplicationContext(String configClassName, ServletContext servletContext) {
         Class<?> configClass;
         try {
             configClass = Class.forName(configClassName);
         } catch (ClassNotFoundException e) {
             throw new ApplicationContextInitException("Failed to load configuration class: " + configClassName, e);
         }
-        return new AnnotationConfigApplicationContext(configClass, new PropertyResolver(loadProperties()));
+        var context = new AnnotationConfigWebApplicationContext(configClass, new PropertyResolver(loadProperties()));
+        context.setServletContext(servletContext);
+        return context;
     }
 
     private Properties loadProperties() {
