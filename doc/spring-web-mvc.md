@@ -17,3 +17,8 @@ Servlet 规范定义的组件有 3 类：
 Web 模块需要把 ServletContext 注入 IOC 容器以便对 ServletContext 进行操作，比如获取资源、注册 Filter 等。为此需要扩展 ApplicationContext
 接口，实现 WebApplicationContext 接口和 ServletContextAware 接口。WebApplicationContext 初始化 -> 注入 ServletContext -> 
 ServletContextAware Bean 注入 ServletContext -> IOC 容器初始化完成
+
+DispatcherServlet 负责拦截和处理所有请求
+1. 扫描所有 Controller，注册到 HandlerMapping 中
+2. 接收 HTTP 请求，调用 HandlerMapping 查找对应的 Controller
+3. 执行前置拦截器、解析Controller参数，反射调用方法、执行后置拦截器
