@@ -5,12 +5,8 @@ import com.cyk.spring.ioc.io.PropertyResolver;
 import com.cyk.spring.ioc.utils.StringUtils;
 import com.cyk.spring.ioc.utils.YamlUtils;
 import com.cyk.spring.web.context.AnnotationConfigWebApplicationContext;
-import com.cyk.spring.web.context.WebApplicationContext;
 import com.cyk.spring.web.exception.ApplicationContextInitException;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletContextEvent;
-import jakarta.servlet.ServletContextListener;
-import jakarta.servlet.ServletRegistration;
+import jakarta.servlet.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,13 +30,19 @@ public class ApplicationContextLifecycleListener implements ServletContextListen
         if (StringUtils.isEmpty(configClassName)) {
             throw new ApplicationContextInitException("Missing init parameter: configClassName");
         }
-        WebApplicationContext applicationContext = createApplicationContext(configClassName, servletContext);
+        var applicationContext = createApplicationContext(configClassName, servletContext);
         servletContext.setAttribute("applicationContext", applicationContext);
 
-        DispatcherServlet dispatcherServlet = new DispatcherServlet();
+        DispatcherServlet dispatcherServlet = new DispatcherServlet(applicationContext);
         ServletRegistration.Dynamic dynamic = servletContext.addServlet("dispatcherServlet", dispatcherServlet);
         dynamic.addMapping("/");
         dynamic.setLoadOnStartup(1);
+
+        try {
+            dispatcherServlet.initServlet();
+        } catch (ServletException e) {
+            throw new ApplicationContextInitException("Failed to initialize DispatcherServlet", e);
+        }
     }
 
     @Override
@@ -52,7 +54,7 @@ public class ApplicationContextLifecycleListener implements ServletContextListen
         }
     }
 
-    private WebApplicationContext createApplicationContext(String configClassName, ServletContext servletContext) {
+    private AnnotationConfigWebApplicationContext createApplicationContext(String configClassName, ServletContext servletContext) {
         Class<?> configClass;
         try {
             configClass = Class.forName(configClassName);

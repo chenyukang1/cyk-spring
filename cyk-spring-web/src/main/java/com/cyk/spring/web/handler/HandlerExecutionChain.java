@@ -1,11 +1,14 @@
 package com.cyk.spring.web.handler;
 
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -18,11 +21,19 @@ public class HandlerExecutionChain {
 
     private static final Logger logger = LoggerFactory.getLogger(HandlerExecutionChain.class);
 
-    private Object handler;
+    private final Object handler;
 
-    private List<HandlerInterceptor> interceptorList = new ArrayList<>();
+    private final List<HandlerInterceptor> interceptorList = new ArrayList<>();
 
     private int interceptorIndex = -1;
+
+    public HandlerExecutionChain(Object handler) {
+        this(handler, (HandlerInterceptor[]) null);
+    }
+
+    public HandlerExecutionChain(Object handler, @Nullable HandlerInterceptor... interceptors) {
+        this(handler, (interceptors != null ? Arrays.asList(interceptors) : Collections.emptyList()));
+    }
 
     public HandlerExecutionChain(Object handler, List<HandlerInterceptor> interceptorList) {
         if (handler instanceof HandlerExecutionChain originalChain) {
@@ -47,7 +58,15 @@ public class HandlerExecutionChain {
         this.interceptorList.add(index, interceptor);
     }
 
-    boolean applyPreHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public void doHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        if (handler instanceof Handler handlerObject) {
+            handlerObject.doHandle(request, response);
+        } else {
+            throw new IllegalStateException("Handler is not an instance of Handler interface");
+        }
+    }
+
+    public boolean applyPreHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
         for (int i = 0; i < interceptorList.size(); i++) {
             HandlerInterceptor interceptor = interceptorList.get(i);
             if (!interceptor.preHandle(request, response, handler)) {
@@ -59,7 +78,7 @@ public class HandlerExecutionChain {
         return true;
     }
 
-    void applyPostHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public void applyPostHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
         for (int i = interceptorIndex; i >= 0; i--) {
             HandlerInterceptor interceptor = interceptorList.get(i);
             interceptor.postHandle(request, response, handler);

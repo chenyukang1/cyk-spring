@@ -9,6 +9,8 @@
         <param-value>com.cyk.spring.web.WebMvcConfiguration</param-value>
     </context-param>
 
+    <default-context-path>/</default-context-path>
+
     <listener>
         <listener-class>com.cyk.spring.web.ApplicationContextLifecycleListener</listener-class>
     </listener>

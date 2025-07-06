@@ -4,6 +4,7 @@ import com.cyk.spring.ioc.definition.BeanDefinition;
 import jakarta.annotation.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * The interface ConfigurableApplicationContext.
@@ -57,4 +58,11 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
      * @return the object
      */
     Object createBeanAsEarlySingleton(BeanDefinition def);
+
+    /**
+     * Gets bean definition names.
+     *
+     * @return the bean definition names
+     */
+    Set<String> getBeanDefinitionNames();
 }

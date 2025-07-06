@@ -56,7 +56,7 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
     @Override
     public List<BeanDefinition> findBeanDefinitions(Class<?> type) {
         return beanDefinitions.values().stream()
-                .filter(definition -> definition.getBeanClass().isAssignableFrom(type))
+                .filter(definition -> type.isAssignableFrom(definition.getBeanClass()))
                 .sorted()
                 .collect(Collectors.toList());
     }
@@ -262,6 +262,11 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
         }
 
         return definition.getInstance();
+    }
+
+    @Override
+    public Set<String> getBeanDefinitionNames() {
+        return beanDefinitions.keySet();
     }
 
     @Override
