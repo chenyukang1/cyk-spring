@@ -17,4 +17,8 @@
 | 004 | 实现AOP               | [解决思路](/doc/spring-aop.md)          |
 | 005 | 实现JDBCTemplate      | [解决思路](/doc/jdbc-template.md)       |
 | 006 | 实现事务                | [解决思路](/doc/spring-tx.md)           |
-| 006 | 实现WebMvc            | [解决思路](/doc/spring-web-mvc.md)      |
+| 007 | 实现WebMvc            | [解决思路](/doc/spring-web-mvc.md)      |
+| 007 | 实现Boot              | [解决思路](/doc/spring-boot.md)         |
+
+## 总结
+

@@ -3,14 +3,12 @@ package com.cyk.spring.web;
 import com.cyk.spring.ioc.context.ApplicationContext;
 import com.cyk.spring.ioc.io.PropertyResolver;
 import com.cyk.spring.ioc.utils.StringUtils;
-import com.cyk.spring.ioc.utils.YamlUtils;
 import com.cyk.spring.web.context.AnnotationConfigWebApplicationContext;
 import com.cyk.spring.web.exception.ApplicationContextInitException;
 import jakarta.servlet.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -19,9 +17,9 @@ import java.util.Properties;
  * @author yukang.chen
  * @date 2025/6/27
  */
-public class ApplicationContextLifecycleListener implements ServletContextListener {
+public class ApplicationContextListener implements ServletContextListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(ApplicationContextLifecycleListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(ApplicationContextListener.class);
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
@@ -61,20 +59,10 @@ public class ApplicationContextLifecycleListener implements ServletContextListen
         } catch (ClassNotFoundException e) {
             throw new ApplicationContextInitException("Failed to load configuration class: " + configClassName, e);
         }
-        var context = new AnnotationConfigWebApplicationContext(configClass, new PropertyResolver(loadProperties()));
+        Properties properties = ConfigLoader.load();
+        var context = new AnnotationConfigWebApplicationContext(configClass, new PropertyResolver(properties));
         context.setServletContext(servletContext);
         return context;
     }
 
-    private Properties loadProperties() {
-        Properties properties = new Properties();
-        Map<String, Object> yamlMap = YamlUtils.loadYamlAsPlainMap("/application.yml");
-        yamlMap.forEach((key, value) -> {
-            if (value instanceof String strValue) {
-                properties.put(key, strValue);
-            }
-        });
-        logger.debug("Loaded properties from application.yml: {}", properties);
-        return properties;
-    }
 }

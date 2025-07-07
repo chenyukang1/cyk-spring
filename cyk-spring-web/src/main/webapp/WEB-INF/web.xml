@@ -12,6 +12,6 @@
     <default-context-path>/</default-context-path>
 
     <listener>
-        <listener-class>com.cyk.spring.web.ApplicationContextLifecycleListener</listener-class>
+        <listener-class>com.cyk.spring.web.ApplicationContextListener</listener-class>
     </listener>
 </web-app>
