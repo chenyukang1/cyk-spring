@@ -1,5 +1,6 @@
 package com.cyk.spring.boot;
 
+import com.cyk.spring.ioc.annotation.ComponentScan;
 import com.cyk.spring.ioc.annotation.Configuration;
 import com.cyk.spring.ioc.annotation.Import;
 import com.cyk.spring.jdbc.JdbcConfiguration;
@@ -17,6 +18,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Configuration
+@ComponentScan
 @Import({JdbcConfiguration.class, WebMvcConfiguration.class})
 public @interface SpringBootApplication {
 

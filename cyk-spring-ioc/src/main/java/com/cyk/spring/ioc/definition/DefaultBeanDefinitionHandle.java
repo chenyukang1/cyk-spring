@@ -47,7 +47,7 @@ public class DefaultBeanDefinitionHandle implements IBeanDefinitionHandle {
         }
 
         // 2.查找@Import(Xyz.class)
-        Import importConfig = configClass.getAnnotation(Import.class);
+        Import importConfig = ClassUtils.findAnnotation(configClass, Import.class);
         if (importConfig != null) {
             for (Class<?> importConfigClass : importConfig.value()) {
                 String importClassName = importConfigClass.getName();

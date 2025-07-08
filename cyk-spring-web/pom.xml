@@ -11,7 +11,8 @@
 
     <groupId>com.cyk.spring.web</groupId>
     <artifactId>cyk-spring-web</artifactId>
-    <packaging>war</packaging>
+<!--    <packaging>war</packaging>-->
+    <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -53,8 +54,8 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <finalName>ROOT</finalName>
-    </build>
+<!--    <build>-->
+<!--        <finalName>ROOT</finalName>-->
+<!--    </build>-->
 
 </project>

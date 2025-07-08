@@ -1,6 +1,9 @@
 package com.cyk.spring.web;
 
+import com.cyk.spring.ioc.annotation.Bean;
 import com.cyk.spring.ioc.annotation.Configuration;
+import com.cyk.spring.web.handler.DefaultHandlerMapping;
+import com.cyk.spring.web.handler.HandlerMapping;
 
 /**
  * The class WebMvcConfiguration
@@ -20,9 +23,9 @@ public class WebMvcConfiguration {
 //        return new FreeMarkerViewResolver(new TemplateConfig(templatePath, templateEncoding), servletContext);
 //    }
 
-//    @Bean(initMethod = "init")
-//    public Handler handler() {
-//        return new DefaultHandler();
-//    }
+    @Bean
+    public HandlerMapping handlerMapping() {
+        return new DefaultHandlerMapping();
+    }
 
 }

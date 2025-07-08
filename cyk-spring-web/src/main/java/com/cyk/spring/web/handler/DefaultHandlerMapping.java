@@ -1,10 +1,7 @@
 package com.cyk.spring.web.handler;
 
-import com.cyk.spring.ioc.annotation.Component;
-import com.cyk.spring.ioc.context.ApplicationContext;
-import com.cyk.spring.ioc.context.ApplicationContextAware;
-import com.cyk.spring.ioc.context.ConfigurableApplicationContext;
 import com.cyk.spring.ioc.exception.BeansException;
+import com.cyk.spring.web.WebContext;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,21 +16,20 @@ import java.util.List;
  * @author yukang.chen
  * @date 2025/6/30
  */
-@Component
-public class DefaultHandlerMapping implements HandlerMapping, ApplicationContextAware {
+public class DefaultHandlerMapping implements HandlerMapping {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultHandlerMapping.class);
+
     private Handler defaultHandler;
 
     private Object handler;
 
     private final List<HandlerInterceptor> interceptors = new ArrayList<>();
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void init() throws BeansException {
         defaultHandler = new DefaultHandler();
         try {
-            defaultHandler.init((ConfigurableApplicationContext) applicationContext);
+            defaultHandler.init(WebContext.getApplicationContext());
         } catch (Exception e) {
             log.error("Failed to initialize default handler", e);
             throw new BeansException("Failed to initialize default handler", e);

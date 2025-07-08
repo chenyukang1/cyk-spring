@@ -31,6 +31,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class DefaultHandler implements Handler {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultHandler.class);
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     private ConfigurableApplicationContext context;

@@ -14,6 +14,7 @@
         <module>cyk-spring-jdbc</module>
         <module>cyk-spring-web</module>
         <module>cyk-spring-boot</module>
+        <module>cyk-spring-test</module>
     </modules>
 
     <properties>
@@ -33,7 +34,7 @@
         <slf4j.version>1.7.36</slf4j.version>
         <snakeyaml.version>1.33</snakeyaml.version>
         <sqlite.version>3.41.2.2</sqlite.version>
-        <tomcat.version>9.0.75</tomcat.version>
+        <tomcat.version>10.1.19</tomcat.version>
     </properties>
 
     <dependencyManagement>

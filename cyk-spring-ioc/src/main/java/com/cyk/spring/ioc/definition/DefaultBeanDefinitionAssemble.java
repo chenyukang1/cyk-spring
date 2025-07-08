@@ -32,12 +32,9 @@ public class DefaultBeanDefinitionAssemble extends AbstractBeanDefinitionAssembl
         } else {
             // 未找到@Component，继续在其他注解中查找@Component
             for (Annotation annotation : clazz.getAnnotations()) {
-                if (ClassUtils.findAnnotation(annotation.annotationType(), Component.class) != null) {
-                    try {
-                        name = (String) annotation.annotationType().getMethod("value").invoke(annotation);
-                    } catch (ReflectiveOperationException e) {
-                        throw new BeanDefinitionException("Cannot get annotation value.", e);
-                    }
+                component = ClassUtils.findAnnotation(annotation.annotationType(), Component.class);
+                if (component != null) {
+                    name = component.value();
                 }
             }
         }

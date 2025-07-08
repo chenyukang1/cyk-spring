@@ -10,5 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public interface HandlerMapping {
 
+    void init() throws Exception;
+
     HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception;
 }

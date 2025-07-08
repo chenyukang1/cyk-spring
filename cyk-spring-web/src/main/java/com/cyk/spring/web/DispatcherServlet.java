@@ -66,5 +66,13 @@ public class DispatcherServlet extends HttpServlet {
         } else {
             throw new ServerErrorException("No HandlerMapping found in the application context.");
         }
+        for (HandlerMapping mapping : handlerMappings) {
+            try {
+                mapping.init();
+            } catch (Exception e) {
+                logger.error("Failed to initialize HandlerMapping: {}", mapping.getClass().getName(), e);
+                throw new ServerErrorException("Failed to initialize HandlerMapping: " + mapping.getClass().getName(), e);
+            }
+        }
     }
 }

@@ -1,15 +1,11 @@
 package com.cyk.spring.boot;
 
-import com.cyk.spring.ioc.io.PropertyResolver;
-import com.cyk.spring.web.DispatcherServlet;
-import com.cyk.spring.web.context.AnnotationConfigWebApplicationContext;
-import com.cyk.spring.web.exception.ApplicationContextInitException;
+import com.cyk.spring.web.WebContext;
 import jakarta.servlet.ServletContainerInitializer;
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -20,32 +16,19 @@ import java.util.Set;
  */
 public class ApplicationContextInitializer implements ServletContainerInitializer {
 
+    private static final Logger log = LoggerFactory.getLogger(ApplicationContextInitializer.class);
     private final Class<?> configClass;
 
-    private final Properties properties;
-
-    public ApplicationContextInitializer(Class<?> configClass, Properties properties) {
+    public ApplicationContextInitializer(Class<?> configClass) {
         this.configClass = configClass;
-        this.properties = properties;
     }
 
     @Override
     public void onStartup(Set<Class<?>> set, ServletContext servletContext) {
+        log.info("Servlet container starting.");
         servletContext.setRequestCharacterEncoding("UTF-8");
         servletContext.setResponseCharacterEncoding("UTF-8");
 
-        var applicationContext = new AnnotationConfigWebApplicationContext(configClass, new PropertyResolver(properties));
-        servletContext.setAttribute("applicationContext", applicationContext);
-
-        DispatcherServlet dispatcherServlet = new DispatcherServlet(applicationContext);
-        ServletRegistration.Dynamic dynamic = servletContext.addServlet("dispatcherServlet", dispatcherServlet);
-        dynamic.addMapping("/");
-        dynamic.setLoadOnStartup(1);
-
-        try {
-            dispatcherServlet.initServlet();
-        } catch (ServletException e) {
-            throw new ApplicationContextInitException("Failed to initialize DispatcherServlet", e);
-        }
+        WebContext.initialize(configClass, servletContext);
     }
 }
